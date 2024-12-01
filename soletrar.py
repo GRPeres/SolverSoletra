@@ -64,7 +64,7 @@ async def main():
     if os.path.exists(rejected_file):
         os.remove(rejected_file)
 
-    wordsize = int(input("Enter max word size: "))
+    wordsize = 17
     base_letters = input("Enter 7 letters (no spaces): ").strip().lower()
     main_letter = input("Enter the main letter to filter by: ").strip().lower()
 
