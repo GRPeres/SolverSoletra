@@ -11,7 +11,7 @@ import asyncio
 
 
 # Path to your Firefox profile (make sure to replace with your actual path)
-profile_path = r'C:\Users\Gabriel\AppData\Roaming\Mozilla\Firefox\Profiles\y7m5im1a.default-release'
+#profile_path = r'your_profile path'
 
 # Step 1: Set up Firefox options to use the profile
 options = Options()
