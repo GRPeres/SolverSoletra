@@ -1,3 +1,7 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import os
 import asyncio
 from unidecode import unidecode
@@ -54,7 +58,10 @@ def save_words_to_file(words, filename):
             f.write(word + '\n')
 
 # Main function
-async def main():
+async def solve(base_letters):
+
+    WORDSIZE = 17
+
     output_file = 'filtered_words.txt'
     rejected_file = 'rejected_words.txt'
 
@@ -64,14 +71,17 @@ async def main():
     if os.path.exists(rejected_file):
         os.remove(rejected_file)
 
-    wordsize = 17
-    base_letters = input("Enter 7 letters (no spaces): ").strip().lower()
-    main_letter = input("Enter the main letter to filter by: ").strip().lower()
+   
+      # Print out the extracted letters
+    print("Extracted letters:", base_letters)
+    main_letter = base_letters[0]
+    # Print out the extracted letters
+    print("Main letters:", main_letter)
 
     # Use ProcessPoolExecutor to distribute the work of filtering across multiple processes
     with ProcessPoolExecutor() as executor:
         tasks = []
-        for x in range(4, wordsize + 1):
+        for x in range(4, WORDSIZE + 1):
             # Schedule processing of words for each word size
             task = asyncio.ensure_future(process_words_for_size(base_letters, main_letter, x, 'br-sem-acentos.txt'))
             tasks.append(task)
@@ -92,6 +102,3 @@ async def main():
             print(f"Found {len(accepted_words)} valid words, saved to {output_file}")
             print(f"Rejected {len(rejected_words)} words (likely verbs or plurals), saved to {rejected_file}")
 
-# Run the main function with asyncio event loop
-if __name__ == "__main__":
-    asyncio.run(main())
