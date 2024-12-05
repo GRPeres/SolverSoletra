@@ -4,6 +4,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from lastResort import lastResort
 from autocomplete import autocomplete
 from solver import solve
 from letterScraping import letters
@@ -39,4 +40,5 @@ close_popup_button.click()
 asyncio.run(solve(letters(driver)))
 
 # Step 7: Call autocomplete function
-autocomplete(driver)
+lista_correta = autocomplete(driver)
+lastResort(lista_correta)
