@@ -4,12 +4,12 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from dictmaker import update_dictionary
-from lastResort import lastResort
-from autocomplete import autocomplete
-from solver import solve
-from letterScraping import letters
-from final_result import final_result
+from Modulos.dictmaker import update_dictionary
+from Modulos.lastResort import lastResort
+from Modulos.autocomplete import autocomplete
+from Modulos.solver import solve
+from Modulos.letterScraping import letters
+from Modulos.final_result import final_result
 import asyncio
 import os
 
