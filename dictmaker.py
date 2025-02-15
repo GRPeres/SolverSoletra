@@ -1,41 +1,52 @@
+import os
 import unicodedata
 
 # Function to normalize and remove accent marks
 def remove_accents(input_str):
     nfkd_form = unicodedata.normalize('NFKD', input_str)
-    return ''.join([c for c in nfkd_form if not unicodedata.combining(c)])
+    return ''.join([c for c in nfkd_form if not unicodedata.combining(c)]).lower()
 
-# Function to process a text file
-def process_file(file_path, encoding='utf-8'):
+# Function to read words from a file and normalize them
+def read_words(file_path):
     words = set()
-    try:
-        with open(file_path, 'r', encoding=encoding) as file:
-            for line in file:
-                word = line.strip().lower()  # Convert to lowercase and remove extra spaces
-                word = remove_accents(word)  # Remove accents
-                words.add(word)
-    except UnicodeDecodeError:
-        print(f"Error reading {file_path} with encoding {encoding}.")
+    with open(file_path, 'r', encoding='utf-8') as file:
+        for line in file:
+            word = line.strip()  # Remove extra spaces
+            word = remove_accents(word)  # Normalize the word
+            words.add(word)
     return words
 
-# Combine the words from both files
-def combine_files(file1, encoding1, file2, encoding2, output_file):
-    words1 = process_file(file1, encoding1)
-    words2 = process_file(file2, encoding2)
+# Function to write words to a file, grouped by length and sorted alphabetically
+def write_words(file_path, words):
+    # Group words by length
+    words_by_length = {}
+    for word in words:
+        length = len(word)
+        if length not in words_by_length:
+            words_by_length[length] = []
+        words_by_length[length].append(word)
     
-    # Combine both sets (set automatically removes duplicates)
-    combined_words = words1.union(words2)
+    # Sort words by length and then alphabetically
+    with open(file_path, 'w', encoding='utf-8') as file:
+        for length in sorted(words_by_length.keys()):
+            for word in sorted(words_by_length[length]):
+                file.write(word + '\n')
+
+# Function to update the dictionary with new words
+def update_dictionary(dictionary_file, new_words_file):
+    # Read existing dictionary words
+    if os.path.exists(dictionary_file):
+        dictionary_words = read_words(dictionary_file)
+    else:
+        dictionary_words = set()
     
-    # Write to output file
-    with open(output_file, 'w', encoding='utf-8') as outfile:
-        for word in sorted(combined_words):  # Sort the words alphabetically
-            outfile.write(word + '\n')
+    # Read new words from the final result file
+    new_words = read_words(new_words_file)
+    
+    # Merge and deduplicate
+    updated_words = dictionary_words.union(new_words)
+    
+    # Write back to the dictionary file
+    write_words(dictionary_file, updated_words)
 
-# Example usage
-file1 = 'wordsList.txt'  # Replace with the path to your first file
-encoding1 = 'ANSI'  # Replace with the encoding of your first file (e.g., 'utf-8', 'latin1')
-file2 = 'br-sem-acentos.txt'  # Replace with the path to your second file
-encoding2 = 'utf-8'  # Replace with the encoding of your second file (e.g., 'utf-8', 'latin1')
-output_file = 'br-sem-acentos.txt'  # Path for the output file
-
-combine_files(file1, encoding1, file2, encoding2, output_file)
+    print("Dictionary updated successfully.")

@@ -4,20 +4,19 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from dictmaker import update_dictionary
 from lastResort import lastResort
 from autocomplete import autocomplete
 from solver import solve
 from letterScraping import letters
+from final_result import final_result
 import asyncio
+import os
 
-
-# Path to your Firefox profile (make sure to replace with your actual path)
-#profile_path = r'your_profile path'
-
-# Step 1: Set up Firefox options to use the profile
+# Step 1: Set up Firefox options
 options = Options()
 
-# Step 2: Initialize the WebDriver with the profile
+# Step 2: Initialize the WebDriver
 driver = webdriver.Firefox(options=options)
 
 # Open the webpage
@@ -26,7 +25,7 @@ driver.get(url)
 
 # Step 3: Wait for the "Iniciar" button to be clickable
 start_button = WebDriverWait(driver, 10).until(
-    EC.element_to_be_clickable((By.XPATH, '//button[@class="button button--game-white intro-button svelte-1g6agin" and @title="Botão responsável por começar o jogo"]'))
+    EC.element_to_be_clickable((By.CSS_SELECTOR, 'button[title="Botão responsável por começar o jogo"]'))
 )
 start_button.click()
 
@@ -37,8 +36,37 @@ close_popup_button = WebDriverWait(driver, 10).until(
 close_popup_button.click()
 
 # Step 6: Call the solve function with the letter scrapping as letters variable to obtain letters from site
-asyncio.run(solve(letters(driver)))
+letras = asyncio.run(solve(letters(driver)))
+with open('filtered_words.txt', 'r') as file:
+    lines = file.readlines()
+autocomplete(driver,lines)
 
-# Step 7: Call autocomplete function
-lista_correta = autocomplete(driver)
-lastResort(lista_correta)
+# Step 7: Confirmation step for brute force
+confirmation = input("Gostaria de tentar encontrar as palavras restantes por meio de força bruta?(Warning:isso pode demorar horas) (Y/n): ").strip().lower()
+if confirmation == 'Y':
+    lastResort(driver, letras)
+    
+    with open('last_resort.txt', 'r') as file:
+        brutelines = file.readlines()
+    autocomplete(driver, brutelines)
+else:
+    print("Skipping brute-force step.")
+
+# Step 8: Save correct to a file
+final_result(driver)
+
+# Update the dictionary
+update_dictionary('br-sem-acentos.txt', 'final_words.txt')
+
+# Deletes Aux Files
+if os.path.exists('last_resort.txt'):
+    os.remove('last_resort.txt')
+    print(f"File '{'last_resort.txt'}' has been deleted.")
+else:
+    print(f"File '{'last_resort.txt'}' does not exist.")
+
+if os.path.exists('filtered_words.txt'):
+    os.remove('filtered_words.txt')
+    print(f"File '{'filtered_words.txt'}' has been deleted.")
+else:
+    print(f"File '{'filtered_words.txt'}' does not exist.")

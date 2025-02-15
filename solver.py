@@ -31,11 +31,6 @@ async def filter_words(base_letters, valid_words, wordsize):
 async def filter_by_main_letter(words, main_letter):
     return {word for word in words if main_letter in word}
 
-# Function to check if a word is plural or a verb (for rejection)
-def maybe_plural(word):
-    verb_endings = ['s', 'ei', 'iu', 'ndo']
-    return any(word.endswith(ending) for ending in verb_endings)
-
 # Asynchronous function to process all tasks concurrently
 async def process_words_for_size(base_letters, main_letter, x, filename):
     valid_words = await load_and_process_words(filename, x)
@@ -44,12 +39,6 @@ async def process_words_for_size(base_letters, main_letter, x, filename):
     filtered_by_main_letter = await filter_by_main_letter(found_words, main_letter)
     
     return filtered_by_main_letter
-
-# Function to process and separate accepted and rejected words
-def separate_accepted_and_rejected(filtered_words):
-    rejected_words = [word for word in filtered_words if maybe_plural(word)]
-    accepted_words = [word for word in filtered_words if not maybe_plural(word)]
-    return accepted_words, rejected_words
 
 # Function to save words to files
 def save_words_to_file(words, filename):
@@ -63,16 +52,12 @@ async def solve(base_letters):
     WORDSIZE = 17
 
     output_file = 'filtered_words.txt'
-    rejected_file = 'rejected_words.txt'
 
-    # Delete the output files if they exist
+    # Delete the output file if it exists
     if os.path.exists(output_file):
         os.remove(output_file)
-    if os.path.exists(rejected_file):
-        os.remove(rejected_file)
 
-   
-      # Print out the extracted letters
+    # Print out the extracted letters
     print("Extracted letters:", base_letters)
     main_letter = base_letters[0]
     # Print out the extracted letters
@@ -90,15 +75,13 @@ async def solve(base_letters):
         results = await asyncio.gather(*tasks)
 
         # Process each word size result
+        all_filtered_words = []
         for filtered_words in results:
-            filtered_words = sorted(filtered_words)
+            all_filtered_words.extend(filtered_words)
 
-            accepted_words, rejected_words = separate_accepted_and_rejected(filtered_words)
+        # Save all filtered words to the output file
+        save_words_to_file(sorted(all_filtered_words), output_file)
 
-            # Save accepted and rejected words to files
-            save_words_to_file(accepted_words, output_file)
-            save_words_to_file(rejected_words, rejected_file)
+        print(f"Found {len(all_filtered_words)} valid words, saved to {output_file}")
 
-            print(f"Found {len(accepted_words)} valid words, saved to {output_file}")
-            print(f"Rejected {len(rejected_words)} words (likely verbs or plurals), saved to {rejected_file}")
-
+    return base_letters
