@@ -42,7 +42,7 @@ with open('filtered_words.txt', 'r') as file:
 autocomplete(driver,lines)
 
 # Step 7: Confirmation step for brute force
-confirmation = input("Gostaria de tentar encontrar as palavras restantes por meio de força bruta?(Warning:isso pode demorar horas) (Y/n): ").strip().lower()
+confirmation = input("Gostaria de tentar encontrar as palavras restantes por meio de força bruta?(Warning:isso pode demorar horas) (Y/n): ").strip()
 if confirmation == 'Y':
     lastResort(driver, letras)
     
